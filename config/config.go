@@ -1,16 +1,34 @@
 package config
 
 import (
-	"github.com/spf13/viper"
 	"os"
 	"runtime"
 	"strings"
 	"sync"
+
+	"github.com/spf13/viper"
 )
 
 var once sync.Once
 var realPath string
 var Conf *Config
+
+const (
+	SuccessReplyCode      = 0
+	FailReplyCode         = 1
+	SuccessReplyMsg       = "success"
+	QueueName             = "gochat_queue"
+	RedisBaseValidTime    = 86400
+	RedisPrefix           = "gochat_"
+	RedisRoomPrefix       = "gochat_room_"
+	RedisRoomOnlinePrefix = "gochat_room_online_count_"
+	MsgVersion            = 1
+	OpSingleSend          = 2 // single user
+	OpRoomSend            = 3 // send to room
+	OpRoomCountSend       = 4 // get online user count
+	OpRoomInfoSend        = 5 // send info to room
+	OpBuildTcpConn        = 6 // build tcp conn
+)
 
 type Config struct {
 	Common Common
@@ -82,7 +100,8 @@ func GetGinRunMode() string {
 }
 
 type Common struct {
-	CommonEtcd CommonEtcd `mapstructure:"common-etcd"`
+	CommonEtcd  CommonEtcd  `mapstructure:"common-etcd"`
+	CommonMysql CommonMysql `mapstructure:"common-mysql"`
 }
 
 type CommonEtcd struct {
@@ -95,10 +114,21 @@ type CommonEtcd struct {
 	ConnectionTimeout int    `mapstructure:"connectionTimeout"`
 }
 
+type CommonMysql struct {
+	Host     string `mapstructure:"host"`
+	Port     int    `mapstructure:"port"`
+	UserName string `mapstructure:"user"`
+	Password string `mapstructure:"password"`
+	Database string `mapstructure:"database"`
+}
+
 type ApiConfig struct {
 	ApiBase ApiBase `mapstructure:"api-base"`
 }
 
 type ApiBase struct {
 	ListenPort int `mapstructure:"listenPort"`
+}
+
+type DBConfig struct {
 }

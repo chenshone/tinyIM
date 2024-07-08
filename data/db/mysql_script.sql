@@ -1,0 +1,15 @@
+CREATE TABLE user(
+  `id` INT AUTO_INCREMENT PRIMARY KEY , -- '用户id'
+  `username` varchar(20) not null UNIQUE default '', -- '用户名'
+  `password` char(40) not null default '', -- '密码'
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP -- '创建时间'
+);
+INSERT INTO user VALUES ('1', 'lock', '3d4f2bf07dc1be38b20cd6e46949a1071f9d0e3d', '2019-10-29 00:00:21.446937+08:00');
+INSERT INTO user VALUES ('2', 'test', '3d4f2bf07dc1be38b20cd6e46949a1071f9d0e3d', '2019-10-29 10:56:04.208236+08:00');
+INSERT INTO user VALUES ('3', 'demo', '3d4f2bf07dc1be38b20cd6e46949a1071f9d0e3d', '2019-10-29 16:42:04.818313+08:00');
+INSERT INTO user VALUES ('4', 'admin', '3d4f2bf07dc1be38b20cd6e46949a1071f9d0e3d', '2019-11-01 12:36:48');
+INSERT INTO user VALUES ('5', 'fkfk', '3d4f2bf07dc1be38b20cd6e46949a1071f9d0e3d', '2022-08-03 02:08:04.1832365+08:00');
+INSERT INTO user VALUES ('6', 'fk222', '3d4f2bf07dc1be38b20cd6e46949a1071f9d0e3d', '2022-08-04 01:54:26.5555222+08:00');
+INSERT INTO user VALUES ('7', 'demo1', '3d4f2bf07dc1be38b20cd6e46949a1071f9d0e3d', '2022-09-17 14:00:37.8262501+08:00');
+INSERT INTO user VALUES ('8', 'demo2', '3d4f2bf07dc1be38b20cd6e46949a1071f9d0e3d', '2022-09-17 14:01:10.2547861+08:00');
+INSERT INTO user VALUES ('9', 'demo3', '3d4f2bf07dc1be38b20cd6e46949a1071f9d0e3d', '2022-09-17 14:03:32.5493544+08:00');
