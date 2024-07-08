@@ -1,0 +1,8 @@
+[common-etcd]
+host = "127.0.0.1:2379"
+basePath = "/tinychat_srv"
+serverPathLogic = "LogicRpc"
+serverPathConnect = "ConnectRpc"
+userName = ""
+password = ""
+connectionTimeout = 5
