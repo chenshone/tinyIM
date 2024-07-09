@@ -76,7 +76,7 @@ func (rpc *Logic) GetUserNameByUserId(req *proto.GetUserInfoRequest) (code int, 
 	reply := &proto.GetUserInfoResponse{}
 	LogicRpcClient.Call(context.Background(), "GetUserInfoByUserId", req, reply)
 	code = reply.Code
-	userName = reply.UserName
+	userName = reply.Username
 	return
 }
 
@@ -85,7 +85,7 @@ func (rpc *Logic) CheckAuth(req *proto.CheckAuthRequest) (code int, userId int, 
 	LogicRpcClient.Call(context.Background(), "CheckAuth", req, reply)
 	code = reply.Code
 	userId = reply.UserId
-	userName = reply.UserName
+	userName = reply.Username
 	return
 }
 

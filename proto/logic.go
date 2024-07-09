@@ -17,7 +17,7 @@ type GetUserInfoRequest struct {
 type GetUserInfoResponse struct {
 	Code     int
 	UserId   int
-	UserName string
+	Username string
 }
 
 type RegisterRequest struct {
@@ -45,5 +45,5 @@ type CheckAuthRequest struct {
 type CheckAuthResponse struct {
 	Code     int
 	UserId   int
-	UserName string
+	Username string
 }

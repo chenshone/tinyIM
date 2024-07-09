@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 	"tinyIM/api"
+	"tinyIM/logic"
 )
 
 func main() {
@@ -16,15 +17,17 @@ func main() {
 	fmt.Printf("start run %s module\n", module)
 
 	switch module {
+	case "logic":
+		logic.New().Run()
 	case "api":
 		api.New().Run()
 	default:
 		fmt.Printf("exiting...\nmodule param error!\n")
 		return
 	}
-	fmt.Printf("run %s module done!", module)
+	fmt.Printf("run %s module", module)
 	quit := make(chan os.Signal)
 	signal.Notify(quit, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	<-quit
-	fmt.Println("Server exiting")
+	fmt.Printf("%s module exit", module)
 }

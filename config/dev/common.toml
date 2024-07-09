@@ -13,3 +13,8 @@ port = 3306
 user = "root"
 password = "root"
 database = "tinyim"
+
+[common-redis]
+redisAddress = "127.0.0.1:6379"
+redisPassword = ""
+db = 0

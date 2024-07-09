@@ -17,11 +17,11 @@ const (
 	SuccessReplyCode      = 0
 	FailReplyCode         = 1
 	SuccessReplyMsg       = "success"
-	QueueName             = "gochat_queue"
+	QueueName             = "tinyim_queue"
 	RedisBaseValidTime    = 86400
-	RedisPrefix           = "gochat_"
-	RedisRoomPrefix       = "gochat_room_"
-	RedisRoomOnlinePrefix = "gochat_room_online_count_"
+	RedisPrefix           = "tinyim_"
+	RedisRoomPrefix       = "tinyim_room_"
+	RedisRoomOnlinePrefix = "tinyim_room_online_count_"
 	MsgVersion            = 1
 	OpSingleSend          = 2 // single user
 	OpRoomSend            = 3 // send to room
@@ -33,6 +33,7 @@ const (
 type Config struct {
 	Common Common
 	Api    ApiConfig
+	Logic  LogicConfig
 }
 
 func init() {
@@ -44,7 +45,7 @@ func Init() {
 		env := GetMode()
 		realPath = getCurrentDir()
 		cfgFilePath := realPath + "/" + env + "/"
-		configNames := []string{"/common", "/api"}
+		configNames := []string{"/common", "/api", "/logic"}
 		loadConfig(cfgFilePath, configNames)
 
 		Conf = &Config{}
@@ -52,6 +53,9 @@ func Init() {
 			panic(err)
 		}
 		if err := viper.Unmarshal(&Conf.Api); err != nil {
+			panic(err)
+		}
+		if err := viper.Unmarshal(&Conf.Logic); err != nil {
 			panic(err)
 		}
 	})
@@ -99,9 +103,22 @@ func GetGinRunMode() string {
 	return "release"
 }
 
+type LogicConfig struct {
+	LogicBase LogicBase `mapstructure:"logic-base"`
+}
+
+type LogicBase struct {
+	ServerId   string `mapstructure:"serverId"`
+	CpuNum     int    `mapstructure:"cpuNum"`
+	RpcAddress string `mapstructure:"rpcAddress"`
+	CertPath   string `mapstructure:"certPath"`
+	KeyPath    string `mapstructure:"keyPath"`
+}
+
 type Common struct {
 	CommonEtcd  CommonEtcd  `mapstructure:"common-etcd"`
 	CommonMysql CommonMysql `mapstructure:"common-mysql"`
+	CommonRedis CommonRedis `mapstructure:"common-redis"`
 }
 
 type CommonEtcd struct {
@@ -122,13 +139,16 @@ type CommonMysql struct {
 	Database string `mapstructure:"database"`
 }
 
+type CommonRedis struct {
+	RedisAddress  string `mapstructure:"redisAddress"`
+	RedisPassword string `mapstructure:"redisPassword"`
+	Db            int    `mapstructure:"db"`
+}
+
 type ApiConfig struct {
 	ApiBase ApiBase `mapstructure:"api-base"`
 }
 
 type ApiBase struct {
 	ListenPort int `mapstructure:"listenPort"`
-}
-
-type DBConfig struct {
 }
