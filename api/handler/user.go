@@ -23,7 +23,7 @@ func Login(c *gin.Context) {
 
 	req := &proto.LoginRequest{
 		Name:     user.Username,
-		Password: user.Password,
+		Password: tools.HashWithSalt(user.Password),
 	}
 
 	code, authToken, msg := rpc.LogicInstance.Login(req)

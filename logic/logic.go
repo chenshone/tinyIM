@@ -2,10 +2,11 @@ package logic
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
 	"runtime"
 	"tinyIM/config"
+
+	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 )
 
 type Logic struct {
