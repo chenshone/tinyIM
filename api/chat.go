@@ -3,16 +3,18 @@ package api
 import (
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
-	"golang.org/x/net/context"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 	"tinyIM/api/router"
+	"tinyIM/api/rpc"
 	"tinyIM/config"
+
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
+	"golang.org/x/net/context"
 )
 
 type Chat struct {
@@ -23,6 +25,8 @@ func New() *Chat {
 }
 
 func (c *Chat) Run() {
+	rpc.InitLogicRpcClient()
+
 	r := router.Register()
 	runMode := config.GetGinRunMode()
 	gin.SetMode(runMode)

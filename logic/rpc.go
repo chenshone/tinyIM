@@ -7,10 +7,12 @@ import (
 	"strconv"
 	"time"
 	"tinyIM/config"
+	"tinyIM/data/db"
 	"tinyIM/logic/dao"
 	"tinyIM/proto"
 	"tinyIM/tools"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/sirupsen/logrus"
 )
 
@@ -25,8 +27,11 @@ func (rpc *RpcLogic) Register(ctx context.Context, args *proto.RegisterRequest, 
 		return errors.New("username already exists")
 	}
 	u.Username, u.Password = args.Name, args.Password
-	userId, err := u.Add()
+
+	txn := db.GetDb().Begin()
+	userId, err := u.Add(txn)
 	if err != nil {
+		txn.Rollback()
 		logrus.Infof("register error: %s", err.Error())
 		return err
 	}
@@ -42,15 +47,18 @@ func (rpc *RpcLogic) Register(ctx context.Context, args *proto.RegisterRequest, 
 
 	// set session to redis
 	// 执行redis事务，保证原子性
-	RedisSessionClient.Do(ctx, "MULTI")
-	RedisSessionClient.HSet(ctx, sessionId, userData)
-	RedisSessionClient.Expire(ctx, sessionId, 86400*time.Second) // 24h
-	err = RedisSessionClient.Do(ctx, "EXEC").Err()
+	_, err = RedisSessionClient.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
+		RedisSessionClient.HSet(ctx, sessionId, userData)
+		RedisSessionClient.Expire(ctx, sessionId, 86400*time.Second) // 24h
+		return nil
+	})
 	if err != nil {
+		txn.Rollback()
 		logrus.Infof("register set redis token fail!")
 		return err
 	}
 
+	txn.Commit()
 	reply.Code = config.SuccessReplyCode
 	reply.AuthToken = randomToken
 	return
@@ -84,15 +92,18 @@ func (rpc *RpcLogic) Login(ctx context.Context, args *proto.LoginRequest, reply 
 	userData := make(map[string]any)
 	userData["userId"] = data.Id
 	userData["userName"] = data.Username
-	RedisSessionClient.Do(ctx, "MULTI")
-	RedisSessionClient.HSet(ctx, sessionId, userData)
-	RedisSessionClient.Expire(ctx, sessionId, 86400*time.Second)
-	RedisSessionClient.Set(ctx, loginSessionId, randomToken, 86400*time.Second)
-	err = RedisSessionClient.Do(ctx, "EXEC").Err()
+
+	_, err = RedisSessionClient.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
+		RedisSessionClient.HSet(ctx, sessionId, userData)
+		RedisSessionClient.Expire(ctx, sessionId, 86400*time.Second)
+		RedisSessionClient.Set(ctx, loginSessionId, randomToken, 86400*time.Second)
+		return nil
+	})
 	if err != nil {
 		logrus.Infof("login set redis token fail!")
 		return
 	}
+
 	reply.Code = config.SuccessReplyCode
 	reply.AuthToken = randomToken
 	return
@@ -122,9 +133,8 @@ func (rpc *RpcLogic) CheckAuth(ctx context.Context, args *proto.CheckAuthRequest
 	}
 	intUserId, _ := strconv.Atoi(userDataMap["userId"])
 	reply.UserId = intUserId
-	userName, _ := userDataMap["userName"]
 	reply.Code = config.SuccessReplyCode
-	reply.Username = userName
+	reply.Username = userDataMap["userName"]
 	return
 }
 
