@@ -34,6 +34,7 @@ func (c *Chat) Run() {
 	port := apiCfg.ApiBase.ListenPort
 	logrus.Infof("chat server start in %s mode at :%d", runMode, port)
 
+	// 使用http.Server封装一层gin是为了方便后续实现优雅退出
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
 		Handler: r,
@@ -45,7 +46,7 @@ func (c *Chat) Run() {
 		}
 	}()
 
-	quit := make(chan os.Signal)
+	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	<-quit
 	logrus.Info("shutting down server...")

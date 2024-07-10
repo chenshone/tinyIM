@@ -3,13 +3,10 @@ package logic
 import (
 	"bytes"
 	"strings"
-	"time"
 	"tinyIM/config"
 	"tinyIM/tools"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/rcrowley/go-metrics"
-	"github.com/rpcxio/rpcx-etcd/serverplugin"
 	"github.com/sirupsen/logrus"
 	"github.com/smallnest/rpcx/server"
 	"golang.org/x/net/context"
@@ -40,7 +37,8 @@ func (logic *Logic) InitRpcServer() (err error) {
 	rpcAddrList := strings.Split(config.Conf.Logic.LogicBase.RpcAddress, ",")
 	for _, bind := range rpcAddrList {
 		if network, addr, err = tools.ParseNetwork(bind); err != nil {
-			logrus.Panicf("InitLogicRpc ParseNetwork error : %s", err.Error())
+			logrus.Errorf("InitLogicRpc ParseNetwork error : %s", err.Error())
+			return
 		}
 		logrus.Infof("logic start run at network: %s, addr: %s", network, addr)
 		go logic.createRpcServer(network, addr)
@@ -50,7 +48,7 @@ func (logic *Logic) InitRpcServer() (err error) {
 
 func (logic *Logic) createRpcServer(network, addr string) {
 	s := server.NewServer()
-	logic.addRegistryPlugin(s, network, addr)
+	tools.AddRegistryPlugin(s, network, addr)
 
 	if err := s.RegisterName(config.Conf.Common.CommonEtcd.ServerPathLogic, new(RpcLogic), logic.ServerId); err != nil {
 		logrus.Errorf("register error:%s", err.Error())
@@ -60,21 +58,6 @@ func (logic *Logic) createRpcServer(network, addr string) {
 		s.UnregisterAll()
 	})
 	s.Serve(network, addr)
-}
-
-func (logic *Logic) addRegistryPlugin(s *server.Server, network string, addr string) {
-	r := &serverplugin.EtcdV3RegisterPlugin{
-		ServiceAddress: network + "@" + addr,
-		EtcdServers:    []string{config.Conf.Common.CommonEtcd.Host},
-		BasePath:       config.Conf.Common.CommonEtcd.BasePath,
-		Metrics:        metrics.NewRegistry(),
-		UpdateInterval: time.Minute,
-	}
-	err := r.Start()
-	if err != nil {
-		logrus.Fatal(err)
-	}
-	s.Plugins.Add(r)
 }
 
 func (logic *Logic) getUserKey(authKey string) string {

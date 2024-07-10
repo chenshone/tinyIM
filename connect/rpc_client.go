@@ -2,14 +2,15 @@ package connect
 
 import (
 	"context"
-	"github.com/sirupsen/logrus"
 	"tinyIM/proto"
+
+	"github.com/sirupsen/logrus"
 )
 
-type RpcConnect struct {
+type RpcLogicClient struct {
 }
 
-func (rpc *RpcConnect) Connect(req *proto.ConnectRequest) (uid int, err error) {
+func (rpc *RpcLogicClient) Connect(req *proto.ConnectRequest) (uid int, err error) {
 	reply := &proto.ConnectReply{}
 	err = logicRpcClient.Call(context.Background(), "Connect", req, reply)
 	if err != nil {
@@ -21,7 +22,7 @@ func (rpc *RpcConnect) Connect(req *proto.ConnectRequest) (uid int, err error) {
 	return
 }
 
-func (rpc *RpcConnect) DisConnect(req *proto.DisConnectRequest) (err error) {
+func (rpc *RpcLogicClient) DisConnect(req *proto.DisConnectRequest) (err error) {
 	reply := &proto.DisConnectReply{}
 	err = logicRpcClient.Call(context.Background(), "DisConnect", req, reply)
 	if err != nil {

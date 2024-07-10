@@ -16,8 +16,3 @@ type PushRoomMsgRequest struct {
 	RoomId int
 	Msg    Msg
 }
-
-type PushRoomCountRequest struct {
-	RoomId int
-	Count  int
-}

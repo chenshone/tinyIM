@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 	"tinyIM/api"
+	"tinyIM/connect"
 	"tinyIM/logic"
 )
 
@@ -19,6 +20,8 @@ func main() {
 	switch module {
 	case "logic":
 		logic.New().Run()
+	case "connect_ws":
+		connect.New().Run()
 	case "api":
 		api.New().Run()
 	default:
