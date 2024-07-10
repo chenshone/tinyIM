@@ -31,9 +31,10 @@ const (
 )
 
 type Config struct {
-	Common Common
-	Api    ApiConfig
-	Logic  LogicConfig
+	Common  Common
+	Connect ConnectConfig
+	Api     ApiConfig
+	Logic   LogicConfig
 }
 
 func init() {
@@ -45,11 +46,14 @@ func Init() {
 		env := GetMode()
 		realPath = getCurrentDir()
 		cfgFilePath := realPath + "/" + env + "/"
-		configNames := []string{"/common", "/api", "/logic"}
+		configNames := []string{"/common", "/connect", "/api", "/logic"}
 		loadConfig(cfgFilePath, configNames)
 
 		Conf = &Config{}
 		if err := viper.Unmarshal(&Conf.Common); err != nil {
+			panic(err)
+		}
+		if err := viper.Unmarshal(&Conf.Connect); err != nil {
 			panic(err)
 		}
 		if err := viper.Unmarshal(&Conf.Api); err != nil {
@@ -151,4 +155,54 @@ type ApiConfig struct {
 
 type ApiBase struct {
 	ListenPort int `mapstructure:"listenPort"`
+}
+
+type ConnectBase struct {
+	CertPath string `mapstructure:"certPath"`
+	KeyPath  string `mapstructure:"keyPath"`
+}
+
+type ConnectRpcAddressWebsockts struct {
+	Address string `mapstructure:"address"`
+}
+
+type ConnectRpcAddressTcp struct {
+	Address string `mapstructure:"address"`
+}
+
+type ConnectBucket struct {
+	CpuNum        int    `mapstructure:"cpuNum"`
+	Channel       int    `mapstructure:"channel"`
+	Room          int    `mapstructure:"room"`
+	SrvProto      int    `mapstructure:"svrProto"`
+	RoutineAmount uint64 `mapstructure:"routineAmount"`
+	RoutineSize   int    `mapstructure:"routineSize"`
+}
+
+type ConnectWebsocket struct {
+	ServerId string `mapstructure:"serverId"`
+	Bind     string `mapstructure:"bind"`
+}
+
+type ConnectTcp struct {
+	ServerId      string `mapstructure:"serverId"`
+	Bind          string `mapstructure:"bind"`
+	SendBuf       int    `mapstructure:"sendbuf"`
+	ReceiveBuf    int    `mapstructure:"receivebuf"`
+	KeepAlive     bool   `mapstructure:"keepalive"`
+	Reader        int    `mapstructure:"reader"`
+	ReadBuf       int    `mapstructure:"readBuf"`
+	ReadBufSize   int    `mapstructure:"readBufSize"`
+	Writer        int    `mapstructure:"writer"`
+	WriterBuf     int    `mapstructure:"writerBuf"`
+	WriterBufSize int    `mapstructure:"writeBufSize"`
+}
+
+type ConnectConfig struct {
+	ConnectBase                ConnectBase                `mapstructure:"connect-base"`
+	ConnectRpcAddressWebSockts ConnectRpcAddressWebsockts `mapstructure:"connect-rpcAddress-websockts"`
+	ConnectRpcAddressTcp       ConnectRpcAddressTcp       `mapstructure:"connect-rpcAddress-tcp"`
+	ConnectBucket              ConnectBucket              `mapstructure:"connect-bucket"`
+	ConnectWebsocket           ConnectWebsocket           `mapstructure:"connect-websocket"`
+	ConnectTcp                 ConnectTcp                 `mapstructure:"connect-tcp"`
 }

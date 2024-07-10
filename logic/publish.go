@@ -83,3 +83,17 @@ func (logic *Logic) getUserKey(authKey string) string {
 	returnKey.WriteString(authKey)
 	return returnKey.String()
 }
+
+func (logic *Logic) getRoomUserKey(authKey string) string {
+	var returnKey bytes.Buffer
+	returnKey.WriteString(config.RedisRoomPrefix)
+	returnKey.WriteString(authKey)
+	return returnKey.String()
+}
+
+func (logic *Logic) getRoomOnlineCountKey(authKey string) string {
+	var returnKey bytes.Buffer
+	returnKey.WriteString(config.RedisRoomOnlinePrefix)
+	returnKey.WriteString(authKey)
+	return returnKey.String()
+}

@@ -91,7 +91,7 @@ func (rpc *RpcLogic) Login(ctx context.Context, args *proto.LoginRequest, reply 
 	sessionId := tools.CreateSessionId(randomToken)
 	userData := make(map[string]any)
 	userData["userId"] = data.Id
-	userData["userName"] = data.Username
+	userData["username"] = data.Username
 
 	_, err = RedisSessionClient.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
 		RedisSessionClient.HSet(ctx, sessionId, userData)
@@ -134,7 +134,7 @@ func (rpc *RpcLogic) CheckAuth(ctx context.Context, args *proto.CheckAuthRequest
 	intUserId, _ := strconv.Atoi(userDataMap["userId"])
 	reply.UserId = intUserId
 	reply.Code = config.SuccessReplyCode
-	reply.Username = userDataMap["userName"]
+	reply.Username = userDataMap["username"]
 	return
 }
 
@@ -174,5 +174,70 @@ func (rpc *RpcLogic) Logout(ctx context.Context, args *proto.LogoutRequest, repl
 		return err
 	}
 	reply.Code = config.SuccessReplyCode
+	return
+}
+
+func (rpc *RpcLogic) Connect(ctx context.Context, args *proto.ConnectRequest, reply *proto.ConnectReply) (err error) {
+	if args == nil {
+		logrus.Errorf("logic,connect args empty")
+		return errors.New("logic,connect args empty")
+	}
+
+	logrus.Infof("logic,authToken is:%s", args.AuthToken)
+	logic := &Logic{}
+
+	key := tools.GetSessionName(args.AuthToken)
+	userInfo, err := RedisClient.HGetAll(ctx, key).Result()
+	if err != nil {
+		logrus.Infof("RedisCli HGetAll key :%s , err:%s", key, err.Error())
+		return
+	}
+	if len(userInfo) == 0 {
+		logrus.Infof("no this user session,authToken is:%s", args.AuthToken)
+		return errors.New("no this user session")
+	}
+
+	reply.UserId, _ = strconv.Atoi(userInfo["userId"])
+	roomUserKey := logic.getRoomUserKey(strconv.Itoa(args.RoomId))
+	if reply.UserId != 0 {
+		userKey := logic.getUserKey(strconv.Itoa(reply.UserId))
+		logrus.Infof("logic redis set userKey:%s, serverId : %s", userKey, args.ServerId)
+		validTime := config.RedisBaseValidTime * time.Second // 24h
+		err = RedisClient.Set(ctx, userKey, args.ServerId, validTime).Err()
+		if err != nil {
+			logrus.Warnf("logic set err:%s", err)
+		}
+		if RedisClient.HGet(ctx, roomUserKey, strconv.Itoa(reply.UserId)).Val() == "" {
+			// add curr user to room
+			RedisClient.HSet(ctx, roomUserKey, strconv.Itoa(reply.UserId), userInfo["username"])
+			RedisClient.Incr(ctx, logic.getRoomOnlineCountKey(strconv.Itoa(args.RoomId)))
+		}
+	}
+	logrus.Infof("logic rpc userId:%d", reply.UserId)
+	return
+}
+
+func (rpc *RpcLogic) DisConnect(ctx context.Context, args *proto.DisConnectRequest, reply *proto.DisConnectReply) (err error) {
+	logic := &Logic{}
+	roomUserKey := logic.getRoomUserKey(strconv.Itoa(args.RoomId))
+	roomOnlineCountKey := logic.getRoomOnlineCountKey(strconv.Itoa(args.RoomId))
+
+	if args.RoomId > 0 {
+		// room user count - 1
+		count, _ := RedisClient.Get(ctx, roomOnlineCountKey).Int()
+		if count > 0 {
+			_, _ = RedisClient.Decr(ctx, roomOnlineCountKey).Result()
+		}
+	}
+
+	if args.UserId > 0 {
+		// remove user from room
+		err = RedisClient.HDel(ctx, roomUserKey, fmt.Sprintf("%d", args.UserId)).Err()
+		if err != nil {
+			logrus.Warnf("HDel getRoomUserKey err : %s", err)
+		}
+	}
+
+	// TODO: 通知房间中其他user，该user退出
 	return
 }

@@ -78,7 +78,7 @@ func CheckAuth(c *gin.Context) {
 	}
 	var jsonData = map[string]interface{}{
 		"userId":   userId,
-		"userName": userName,
+		"username": userName,
 	}
 	tools.SuccessWithMsg(c, "auth success", jsonData)
 }

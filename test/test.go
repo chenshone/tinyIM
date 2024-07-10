@@ -1,13 +1,19 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/sirupsen/logrus"
+)
 
-func foo() (int, int) {
-	return 1, 2
+func foo() (a int, b int) {
+	a = 1
+	b = 2
+	logrus.Fatalf("1111")
+	fmt.Println("2222")
+	return
 }
 
 func main() {
-	s := "aaa"
-	sprintf := fmt.Sprintf("%s", s)
-	fmt.Println(sprintf)
+	a, b := foo()
+	fmt.Println("1", a, b)
 }
