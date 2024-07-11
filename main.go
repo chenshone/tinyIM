@@ -28,7 +28,7 @@ func main() {
 		fmt.Printf("exiting...\nmodule param error!\n")
 		return
 	}
-	quit := make(chan os.Signal)
+	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	<-quit
 	fmt.Printf("%s module exit", module)

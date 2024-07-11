@@ -3,11 +3,12 @@ package connect
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/websocket"
-	"github.com/sirupsen/logrus"
 	"time"
 	"tinyIM/proto"
 	"tinyIM/tools"
+
+	"github.com/gorilla/websocket"
+	"github.com/sirupsen/logrus"
 )
 
 type Server struct {
@@ -148,9 +149,9 @@ func (s *Server) readPump(ch *Channel, c *Connect) {
 		b := s.GetBucket(userId)
 		//	insert to bucket
 		if err = b.PutChannel(userId, connReq.RoomId, ch); err != nil {
-			logrus.Errorf("conn will close...\n err: %s", err.Error())
+			logrus.Errorf("put channel into bucket fail, conn will close...\n err: %s", err.Error())
 			// 这里是否可以直接return
-			ch.conn.Close()
+			return
 		}
 	}
 }

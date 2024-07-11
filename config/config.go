@@ -35,6 +35,8 @@ type Config struct {
 	Connect ConnectConfig
 	Api     ApiConfig
 	Logic   LogicConfig
+	Task    TaskConfig
+	Site    SiteConfig
 }
 
 func init() {
@@ -46,7 +48,7 @@ func Init() {
 		env := GetMode()
 		realPath = getCurrentDir()
 		cfgFilePath := realPath + "/" + env + "/"
-		configNames := []string{"/common", "/connect", "/api", "/logic"}
+		configNames := []string{"/common", "/connect", "/api", "/logic", "/task", "/site"}
 		loadConfig(cfgFilePath, configNames)
 
 		Conf = &Config{}
@@ -60,6 +62,12 @@ func Init() {
 			panic(err)
 		}
 		if err := viper.Unmarshal(&Conf.Logic); err != nil {
+			panic(err)
+		}
+		if err := viper.Unmarshal(&Conf.Task); err != nil {
+			panic(err)
+		}
+		if err := viper.Unmarshal(&Conf.Site); err != nil {
 			panic(err)
 		}
 	})
@@ -205,4 +213,25 @@ type ConnectConfig struct {
 	ConnectBucket              ConnectBucket              `mapstructure:"connect-bucket"`
 	ConnectWebsocket           ConnectWebsocket           `mapstructure:"connect-websocket"`
 	ConnectTcp                 ConnectTcp                 `mapstructure:"connect-tcp"`
+}
+
+type TaskBase struct {
+	CpuNum        int    `mapstructure:"cpuNum"`
+	RedisAddr     string `mapstructure:"redisAddr"`
+	RedisPassword string `mapstructure:"redisPassword"`
+	RpcAddress    string `mapstructure:"rpcAddress"`
+	PushChan      int    `mapstructure:"pushChan"`
+	PushChanSize  int    `mapstructure:"pushChanSize"`
+}
+
+type TaskConfig struct {
+	TaskBase TaskBase `mapstructure:"task-base"`
+}
+
+type SiteBase struct {
+	ListenPort int `mapstructure:"listenPort"`
+}
+
+type SiteConfig struct {
+	SiteBase SiteBase `mapstructure:"site-base"`
 }
