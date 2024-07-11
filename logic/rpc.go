@@ -198,18 +198,18 @@ func (rpc *RpcLogic) Connect(ctx context.Context, args *proto.ConnectRequest, re
 	}
 
 	reply.UserId, _ = strconv.Atoi(userInfo["userId"])
-	roomUserKey := logic.getRoomUserKey(strconv.Itoa(args.RoomId))
+	roomKey := logic.getRoomUserKey(strconv.Itoa(args.RoomId))
 	if reply.UserId != 0 {
 		userKey := logic.getUserKey(strconv.Itoa(reply.UserId))
 		logrus.Infof("logic redis set userKey:%s, serverId : %s", userKey, args.ServerId)
-		validTime := config.RedisBaseValidTime * time.Second // 24h
+		validTime := config.RedisBaseValidTime * time.Second // default 24h
 		err = RedisClient.Set(ctx, userKey, args.ServerId, validTime).Err()
 		if err != nil {
 			logrus.Warnf("logic set err:%s", err)
 		}
-		if RedisClient.HGet(ctx, roomUserKey, strconv.Itoa(reply.UserId)).Val() == "" {
+		if RedisClient.HGet(ctx, roomKey, strconv.Itoa(reply.UserId)).Val() == "" {
 			// add curr user to room
-			RedisClient.HSet(ctx, roomUserKey, strconv.Itoa(reply.UserId), userInfo["username"])
+			RedisClient.HSet(ctx, roomKey, strconv.Itoa(reply.UserId), userInfo["username"])
 			RedisClient.Incr(ctx, logic.getRoomOnlineCountKey(strconv.Itoa(args.RoomId)))
 		}
 	}
@@ -222,7 +222,7 @@ func (rpc *RpcLogic) DisConnect(ctx context.Context, args *proto.DisConnectReque
 	roomUserKey := logic.getRoomUserKey(strconv.Itoa(args.RoomId))
 	roomOnlineCountKey := logic.getRoomOnlineCountKey(strconv.Itoa(args.RoomId))
 
-	if args.RoomId > 0 {
+	if args.RoomId != 0 {
 		// room user count - 1
 		count, _ := RedisClient.Get(ctx, roomOnlineCountKey).Int()
 		if count > 0 {

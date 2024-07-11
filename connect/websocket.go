@@ -63,7 +63,7 @@ func (c *Connect) serveWS(server *Server, w http.ResponseWriter, r *http.Request
 	ch.conn = conn
 
 	//send data to websocket conn
-	go server.writePump(ch, c)
+	go server.writePump(ch)
 	//get data from websocket conn
 	go server.readPump(ch, c)
 }
