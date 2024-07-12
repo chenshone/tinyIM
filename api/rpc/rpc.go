@@ -95,3 +95,35 @@ func (rpc *Logic) Logout(req *proto.LogoutRequest) (code int) {
 	code = reply.Code
 	return
 }
+
+func (rpc *Logic) PushSingle(req *proto.Send) (code int, msg string) {
+	reply := &proto.SuccessReply{}
+	LogicRpcClient.Call(context.Background(), "PushSingle", req, reply)
+	code = reply.Code
+	msg = reply.Msg
+	return
+}
+
+func (rpc *Logic) PushRoom(req *proto.Send) (code int, msg string) {
+	reply := &proto.SuccessReply{}
+	LogicRpcClient.Call(context.Background(), "PushRoom", req, reply)
+	code = reply.Code
+	msg = reply.Msg
+	return
+}
+
+func (rpc *Logic) Count(req *proto.Send) (code int, msg string) {
+	reply := &proto.SuccessReply{}
+	LogicRpcClient.Call(context.Background(), "Count", req, reply)
+	code = reply.Code
+	msg = reply.Msg
+	return
+}
+
+func (rpc *Logic) GetRoomInfo(req *proto.Send) (code int, msg string) {
+	reply := &proto.SuccessReply{}
+	LogicRpcClient.Call(context.Background(), "GetRoomInfo", req, reply)
+	code = reply.Code
+	msg = reply.Msg
+	return
+}

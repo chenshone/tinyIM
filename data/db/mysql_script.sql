@@ -1,7 +1,7 @@
 CREATE TABLE user(
   `id` INT AUTO_INCREMENT PRIMARY KEY , -- '用户id'
-  `username` varchar(20) not null UNIQUE default '', -- '用户名'
-  `password` char(40) not null default '', -- '密码'
+  `username` varchar(255) not null UNIQUE default '', -- '用户名'
+  `password` char(255) not null default '', -- '密码'
   `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP -- '创建时间'
 );
 INSERT INTO user VALUES ('1', 'lock', '3d4f2bf07dc1be38b20cd6e46949a1071f9d0e3d', '2019-10-29 00:00:21.446937+08:00');
